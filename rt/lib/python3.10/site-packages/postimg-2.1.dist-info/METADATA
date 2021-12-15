@@ -1,0 +1,16 @@
+Metadata-Version: 2.1
+Name: postimg
+Version: 2.1
+Summary: Upload/share images with imagurl.com
+Home-page: http://github.com/prdpx7/postimg
+Author: Pradeep Khileri
+Author-email: pradeepchoudhary009@gmail.com
+License: MIT
+Keywords: imgur upload share linux script cli-tool
+Platform: UNKNOWN
+Requires-Dist: pyperclip
+Requires-Dist: requests
+
+UNKNOWN
+
+

@@ -1,12 +1,14 @@
 import time
 import datetime
-
 import pyfiglet
 import logging
 import logging.config
 import os
-
+import matplotlib
+import matplotlib.pyplot as plt
 from dotenv import load_dotenv, find_dotenv
+matplotlib.use('Agg')
+import subprocess
 
 load_dotenv(find_dotenv())
 
@@ -130,11 +132,57 @@ def get_7d_weight_log(update, context):
     weight_7d = get_weight_log(user['access_token'], user['user_id'])
     add_typing(update, context)
     if not weight_7d==False:
-        add_text_message(update, context, f"Your body weight over the last 7 days were {weight_7d} steps")
-        logging.info(f"User {user['id']} has run {weight_7d} steps")
+        weight_7d_string = ""
+        for i in weight_7d:
+            weight_7d_string += i + ", "
+        add_text_message(update, context, f"Your body weight over the last 7 days were {weight_7d_string}")
+        logging.info(f"User {user['id']} body weight over the last 7 days were {weight_7d_string}")
     else:
         add_text_message(update, context, f"Error while getting data")
         logging.info(f"Error while getting data for user {user['id']}")
+
+
+def get_7d_weight_vis(update, context):
+    user = search_user(update)
+    weight_7d = get_weight_log(user['access_token'], user['user_id'])
+
+    last_7d_dates = [] 
+    today = datetime.date.today()
+    for i in range(0,7):
+        last_7d_dates.append(today - datetime.timedelta(days=i))
+
+    sample = [1,2,3,4,5,6,7]
+
+    add_typing(update, context)
+    if not weight_7d==False:
+        weight_7d_list = []
+        for i in weight_7d:
+            weight_7d_list.append(float(i))
+        
+        plt.figure(figsize=(16, 6))
+        plt.plot(last_7d_dates, weight_7d_list)  # create figure & 1 axis
+        plt.ylabel('Weight')
+        plt.xlabel('Date')
+        plt.savefig("name.png")
+        ans = subprocess.check_output(['postimg', 'name.png', '--html'])
+        ans = ans.decode('utf-8')
+        index_start = ans.index("https://")
+        index_end =  ans.index("png")
+        index_end = index_end + 3
+        img_link = ans[index_start:index_end]
+
+        print("Generated and forwarded the Visualiation", img_link)       
+        add_text_message(update, context, f"Here is your body weight data for the last 7 days")
+        add_text_message(update, context, f"Visualization Link: {img_link}")
+
+
+        # logging.info(f"User {user['id']} body weight over the last 7 days were {weight_7d_list}")
+    else:
+        add_text_message(update, context, f"Error while getting data")
+        logging.info(f"Error while getting data for user {user['id']}")
+
+
+
 
 
 def help_command_handler(update, context):
@@ -208,6 +256,8 @@ def main():
     dp.add_handler(CommandHandler("today_steps", get_today_running_steps))
 
     dp.add_handler(CommandHandler("weight_logs", get_7d_weight_log))
+    dp.add_handler(CommandHandler("weight_logs_graph", get_7d_weight_vis))
+
 
     # message handler
     dp.add_handler(MessageHandler(Filters.text, main_handler))
@@ -265,3 +315,12 @@ if __name__ == "__main__":
 
     #start server
     main()
+
+"""
+access_token = 
+eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyMzgyWkMiLCJzdWIiOiI5UURNTlEiLCJpc3MiOiJGaXRiaXQiLCJ0eXAiOiJhY2Nlc3NfdG9rZW4iLCJzY29wZXMiOiJyc29jIHJzZXQgcmFjdCBybG9jIHJ3ZWkgcmhyIHJwcm8gcm51dCByc2xlIiwiZXhwIjoxNjQwMTE4NjY0LCJpYXQiOjE2Mzk1NTg5OTF9.NeLoWtkiOeXOaKjsdl7_8xps89wuORliVf-EuyOZSAY
+
+user_id = 
+9QDMNQ
+
+"""
