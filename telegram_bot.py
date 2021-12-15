@@ -125,6 +125,17 @@ def get_today_running_steps(update, context):
         add_text_message(update, context, f"Error while getting data")
         logging.info(f"Error while getting data for user {user['id']}")
 
+def get_7d_weight_log(update, context):
+    user = search_user(update)
+    weight_7d = get_weight_log(user['access_token'], user['user_id'])
+    add_typing(update, context)
+    if not weight_7d==False:
+        add_text_message(update, context, f"Your body weight over the last 7 days were {weight_7d} steps")
+        logging.info(f"User {user['id']} has run {weight_7d} steps")
+    else:
+        add_text_message(update, context, f"Error while getting data")
+        logging.info(f"Error while getting data for user {user['id']}")
+
 
 def help_command_handler(update, context):
     """Send a message when the command /help is issued."""
@@ -195,6 +206,8 @@ def main():
 
     # summary command handlers
     dp.add_handler(CommandHandler("today_steps", get_today_running_steps))
+
+    dp.add_handler(CommandHandler("weight_logs", get_7d_weight_log))
 
     # message handler
     dp.add_handler(MessageHandler(Filters.text, main_handler))

@@ -14,11 +14,12 @@ def call_authorization_url():
     url += "&expires_in=" + os.environ.get("expires_in", "")
     return url
 
-def get_walking_data(acess_token, user_id):
+def get_walking_data(access_token, user_id):
     url = "https://api.fitbit.com/1/user/" + user_id + "/activities/date/today.json"
-    activity_request = requests.get(url, headers={"Authorization": "Bearer " + acess_token})
+    activity_request = requests.get(url, headers={"Authorization": "Bearer " + access_token})
     if activity_request.status_code==200:
         response = activity_request.json()['activities']
+        print(response)
         if len(response)==0:
             return 0
         else:
@@ -26,3 +27,20 @@ def get_walking_data(acess_token, user_id):
     else:
         print("Error while getting data\nError: " + str(activity_request.status_code))
     return False
+
+def get_weight_log(access_token, user_id):
+    url = "https://api.fitbit.com/1/user/" + user_id + "/body/weight/date/today/7d.json"
+    activity_request = requests.get(url, headers={"Authorization": "Bearer " + access_token})
+    print("hellu")
+    if activity_request.status_code==200:
+        response = activity_request.json()['body-weight']
+        print(response)
+        if len(response)==0:
+            return 0
+        else:
+            return [i['value'] for i in response]
+    else:
+        print("Error while getting data\nError: " + str(activity_request.status_code))
+    return False
+
+
